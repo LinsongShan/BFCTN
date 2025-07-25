@@ -63,8 +63,8 @@ otf = psf2otf(psf, szX(1:2));                 % Optical Transfer Function
 para.overlap       = 48;                      % Patch overlap size
 para.msi_patchsize = 64;                      % MSI patch size
 
-para.MaxRank = [0, 4,  4, 4;
-                0,  0,  4, 4;
+para.MaxRank = [0, 35,  4, 12;
+                0,  0,  4, 12;
                 0,  0,  0,  4;
                 0,  0,  0,  0];               % Tensor rank structure
 
