@@ -29,9 +29,9 @@ addpath(genpath('./data'));
 addpath(genpath('./Function'));
 
 %% Load data
-load('chart_and_stuffed_toy_ms.mat');         % Load MSI data
-F = create_F();                                % Create spectral response matrix
-orgTensor = msi(1:512, 1:512, :);              % Crop to 512×512 spatial region
+load('chart_and_stuffed_toy_ms.mat');         % Load data
+F = create_F();                                
+orgTensor = msi(1:512, 1:512, :);              
 orgTensor = (orgTensor - min(orgTensor(:))) / (max(orgTensor(:)) - min(orgTensor(:)));  % Normalize to [0,1]
 szX = size(orgTensor);
 
@@ -44,20 +44,15 @@ figure, imshow(orgImage, []), title('Original Tensor');
 sf = 4;                                        % Spatial downsampling factor
 s0 = sf / 2;                                   
 SNR = 35;                                      % Signal-to-noise ratio (dB)
+degradation_type = 'average';  % Options: 'average', 'gaussian', 'motion'
 
-% Generate degraded observations
-MSI = generate_HRMSI(orgTensor, F);           % High-resolution MSI
-HSI = generate_LRHSI(orgTensor, sf);          % Low-resolution HSI
-% HSI = generate_LRHSI_2(orgTensor, sf);      % Optional: Gaussian-based downsampling
+%% Generate degraded observations
+MSI = generate_HRMSI(orgTensor, F);
+HSI = generate_LRHSI(orgTensor, sf, degradation_type);
 
-% Add Gaussian noise to observations
+% Add noise
 MSI = Addnoise(MSI, SNR);
 HSI = Addnoise(HSI, SNR);
-
-% Define PSF and convert to OTF
-psf = fspecial('average', sf);                % Box filter PSF
-% psf = fspecial('gaussian', 4, 2);           % Optional: Gaussian PSF
-otf = psf2otf(psf, szX(1:2));                 % Optical Transfer Function
 
 %% Set model parameters
 para.overlap       = 48;                      % Patch overlap size
@@ -66,18 +61,33 @@ para.msi_patchsize = 64;                      % MSI patch size
 para.MaxRank = [0, 35,  4, 12;
                 0,  0,  4, 12;
                 0,  0,  0,  4;
-                0,  0,  0,  0];               % Tensor rank structure
+                0,  0,  0,  0];               % FCTN ranks 
 
 para.MAX_Iter  = 6;                           % Max VB iterations
-para.ratio     = sf;                          % Upsampling ratio
+para.ratio     = sf;                          
 
-% Create projection matrices
-P1 = creat_P(para.msi_patchsize, sf);         % Spatial degradation matrix
-P3 = F;                                        % Spectral response matrix
+% Construct degradation kernel & projection
+switch degradation_type
+    case 'average'
+        psf = fspecial('average', sf);
+        P1 = creat_P(para.msi_patchsize, sf);
+    case 'gaussian'
+        psf_size = 4; sigma = 2;
+        psf = fspecial('gaussian', psf_size, sigma);
+        P1 = create_P_gaussian(para.msi_patchsize, sf, psf, psf_size);
+    case 'motion'
+        len = 4; theta = 30;
+        psf = fspecial('motion', len, theta);
+        P1 = create_P_motion(para.msi_patchsize, sf, psf);
+    otherwise
+        error('Unsupported degradation type');
+end
+
+otf = psf2otf(psf, szX(1:2));
 
 %% Run BFCTN fusion
 tic;
-Z = HRHSI_BFCTN(orgTensor, MSI, HSI, P1, P1, P3, para);
+Z = HRHSI_BFCTN(orgTensor, MSI, HSI, P1, P1, F, para);
 t = toc;
 
 % Evaluate quality metrics

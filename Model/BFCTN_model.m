@@ -140,9 +140,7 @@ classdef BFCTN_model
                 self.hat = double(tnprod_new(self.Factors));
                 self.RMSE_List(iter,1) = sqrt( sum((self.Org(:)-self.hat(:)).^2)./length(self.Org(:)) );
                 self.PSNR_List(iter,1) = lyPSNR(self.Org, self.hat);
-                if mod(iter, 1)==0
-                    fprintf('                   vb: Iter%3d.  rmse:%g  psnr:%g  \n', iter, self.RMSE_List(iter),self.PSNR_List(iter));
-                end
+               
 
             end
             fprintf('                    rmse:%g  psnr:%g\n ',  self.RMSE_List(iter),self.PSNR_List(iter));
