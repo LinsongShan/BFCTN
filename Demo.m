@@ -24,7 +24,7 @@
 clc; close all; clear;
 
 %% Add necessary paths
-addpath(genpath('./BFCTN_VB'));
+addpath(genpath('./Model'));
 addpath(genpath('./data'));
 addpath(genpath('./Function'));
 
