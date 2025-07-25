@@ -1,0 +1,123 @@
+function HRHSI = HRHSI_CP(Org,MSI,HSI, U, V, para,hyperparameters)
+M = size(MSI,1);
+m = size(HSI,1);
+N = size(MSI,2);
+n = size(HSI,2);
+L = size(HSI,3);
+l = size(MSI,3);
+
+mparams.block_sz = [para.msi_patchsize, para.msi_patchsize]; 
+hparams.block_sz = [para.hsi_patchsize, para.hsi_patchsize];
+full.block_sz = [para.msi_patchsize, para.msi_patchsize];
+mparams.sz = [M, N, l];
+hparams.sz = [m, n, L];
+full.sz = [M, N, L];
+
+num1 = M / msi_patchsize;
+num2 = N / msi_patchsize;
+mparams.block_num = [num1 num2]; 
+hparams.block_num = [num1 num2];
+full.block_num = [num1 num2];
+
+
+%% 
+Z = zeros(msi_patchsize, msi_patchsize, L, num1*num2); % 用于存储重建的HRHSI块 
+MMM = zeros(msi_patchsize, msi_patchsize, l, num1*num2);
+HHH = zeros(hsi_patchsize, hsi_patchsize, L, num1*num2);
+ 
+MSI_blocks = ExtractBlocks(MSI, mparams); % 提取MSI的所有块 
+M2 = Unfold(MSI_blocks, size(MSI_blocks), 4); % 展开  每一行代表一个块
+
+HSI_blocks = ExtractBlocks(HSI, hparams); % 提取HSI的所有块 
+H2 = Unfold(HSI_blocks, size(HSI_blocks), 4);
+
+O_blocks = ExtractBlocks(Org, full);
+O2 = Unfold(O_blocks, size(O_blocks), 4);
+
+% 聚类，给每个块打上标签
+[label] = fkmeans(M2, para.cluster); 
+
+% U = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+% 
+% V = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0];
+% U = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0;
+%     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+
+
+
+
+for cluster = 1:max(label)
+
+    fprintf('***%gth cluster***\n', cluster);
+
+    pos = find(label==cluster);
+    n_k = numel(pos);
+    
+    M_k = zeros(l, msi_patchsize * msi_patchsize, length(pos));    
+    H_k = zeros(L, hsi_patchsize * hsi_patchsize, length(pos)); 
+    O_k = zeros(L, msi_patchsize * msi_patchsize, length(pos));
+
+    for i=1:length(pos)
+        M_k(:, :, i) = reshape(M2(pos(i), :), l, msi_patchsize * msi_patchsize);
+        H_k(:, :, i) = reshape(H2(pos(i), :), L, hsi_patchsize * hsi_patchsize);
+        O_k(:, :, i) = reshape(O2(pos(i), :), L, msi_patchsize * msi_patchsize);
+    end
+
+
+    % 进行CP分解 得A，B，C 
+    % MaxRank = ceil(1000 * (n_k / (num1 * num2)));
+    MaxRank = 10;
+
+    
+    
+    gibbs = cp_model(M_k, H_k, O_k, U, V, MaxRank, hyperparameters); % get model
+    gibbs = gibbs.initialize();  % init model
+    gibbs = gibbs.run(MAX_Iter, Burn_Iter);       % train
+    A = gibbs.Factors{1};
+    B = gibbs.Factors{2};
+    C = gibbs.Factors{3};
+    
+    MM = double(ktensor({U * A, B, C}));
+    HH = double(ktensor({A, V * B, C}));
+    Z_k = double(ktensor({A, B, C}));
+
+    for j = 1 : length(pos)
+        MMM(:,:,:,pos(j)) = reshape(MM(:, :, j)', msi_patchsize, msi_patchsize, l);
+
+        HHH(:,:,:,pos(j)) = reshape(HH(:, :, j)', hsi_patchsize, hsi_patchsize, L);
+
+        Z(:,:,:,pos(j)) = reshape(Z_k(:, :, j)', msi_patchsize, msi_patchsize, L);
+    end 
+
+    fprintf('\n');
+end
+
+HRHSI = merge(Z, full);
+HRMSI = merge(MMM, mparams);
+LRHSI = merge(HHH, hparams);
+
+PSNR1 = lyPSNR(MSI, HRMSI);
+PSNR2 = lyPSNR(HSI, LRHSI);
+
+fprintf('      *********** H_RSNR:%g  M_PSNR:%g \n', PSNR1, PSNR2);
+
+[MSIImage] = func_hyperImshow(HRMSI,[15,8,3]); 
+figure, imshow(MSIImage, [])
+[HSIImage] = func_hyperImshow(LRHSI,[30,17,5]); 
+figure, imshow(HSIImage, [])
+ 

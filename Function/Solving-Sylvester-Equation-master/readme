@@ -1,0 +1,21 @@
+--------------------------------------------------Solving Sylvester Equations----------------------------------------------------------------------------
+
+Developed by: Hari Shrawgi
+
+Language: MATLAB
+
+--------------------------------------------------Solving Sylvester Equations----------------------------------------------------------------------------
+
+The scripts together constitute two methods to solve Sylvester Equation.
+First method uses Kronecker product to convert the equation into a vectorized linear equation, which is then solved substitution.
+Second method uses Schur factorization instead.
+
+Following are descriptions of the various scripts:
+
+1. sylvester_kronecker.m: Implementation of the first method to solve Sylvester equation using Kronecker product.
+2. QRapp1_modifed.m: Finds Schur decomposition using QR algorithm with Householder reflections.
+3. sylvester_schur.m: Implementation of the second method to solve Sylvester equation using Schur factorizaion.
+
+Rest of the scripts are helper scripts.
+
+-----------------------------------------x-------------------------------------x----------------------------------x----------------------------------
