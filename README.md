@@ -7,7 +7,7 @@
 ---
 
 ## 🧭 Introduction
-<img width="1116" height="748" alt="image" src="https://github.com/user-attachments/assets/a080f005-d221-461b-ac33-fb70acf80dec" />
+<img width="1116" height="748" alt="image" src="https://github.com/user-attachments/assets/a080f005-d221-461b-ac33-fb70acf80dec " style="zoom:67%;"/>
 
 
 **Bayesian Fully Connected Tensor Network (BFCTN)** is a novel Bayesian framework designed for **hyperspectral–multispectral image fusion**.  
