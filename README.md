@@ -4,6 +4,7 @@
 
 This repository provides a MATLAB implementation of the method proposed in our paper:
 
+📄 **Paper:** [Bayesian Fully Connected Tensor Network for Hyperspectral and Multispectral Image Fusion (arXiv:2510.18400)](https://arxiv.org/abs/2510.18400)
 
 
 ## 🗂 Folder Structure
