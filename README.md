@@ -7,7 +7,8 @@
 ---
 
 ## 🧭 Introduction
-[BFCTN_model.pdf](https://github.com/user-attachments/files/23055848/BFCTN_model.pdf)
+<img width="1116" height="748" alt="image" src="https://github.com/user-attachments/assets/a080f005-d221-461b-ac33-fb70acf80dec" />
+
 
 **Bayesian Fully Connected Tensor Network (BFCTN)** is a novel Bayesian framework designed for **hyperspectral–multispectral image fusion**.  
 Unlike traditional tensor-based or deep learning fusion models, BFCTN introduces a **fully connected tensor representation** that jointly models spectral, spatial, and latent dependencies under a **Bayesian inference paradigm**.
@@ -65,11 +66,13 @@ MATLAB R2022a or later
 ## 🔬 Citation
 
 If you find this work helpful, please consider citing our paper:
-
+```
 @article{shan2025bfctn,
   title={Bayesian Fully Connected Tensor Network for Hyperspectral and Multispectral Image Fusion},
   author={Linsong Shan, Laurence T. Yang, Zecan Yang, Changlong Li, Honglu Zhao, Xin Nie},
   journal={arXiv preprint arXiv:2510.18400},
   year={2025}
 }
+```
+
 
