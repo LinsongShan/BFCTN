@@ -70,11 +70,12 @@ MATLAB R2022a or later
 
 If you find this work helpful, please consider citing our paper:
 ```
-@article{shan2025bfctn,
-  title={Bayesian Fully Connected Tensor Network for Hyperspectral and Multispectral Image Fusion},
-  author={Linsong Shan, Zecan Yang, Laurence T. Yang, Changlong Li, Honglu Zhao, Xin Nie},
-  journal={arXiv preprint arXiv:2510.18400},
-  year={2025}
+@article{shan2026bayesian,
+  title={Bayesian Fully-Connected Tensor Network for Hyperspectral-Multispectral Image Fusion},
+  author={Shan, Linsong and Yang, Zecan and Yang, Laurence T and Li, Changlong and Zhao, Honglu and Nie, Xin},
+  journal={IEEE Transactions on Image Processing},
+  year={2026},
+  publisher={IEEE}
 }
 ```
 
