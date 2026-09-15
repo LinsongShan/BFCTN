@@ -1,23 +1,24 @@
 classdef BFCTN_model
     properties
-        msi; hsi; Org; 
-        rank; 
+        msi; hsi; Org;
+        rank;
         P1; P2; P3;
         lambda_a_0; lambda_b_0;
         alpha_c_0; alpha_d_0;
-        beta_e_0; beta_f_0; 
+        beta_e_0; beta_f_0;
         W; w; H; h; S; s; N_k;
-        dim; order; 
+        dim; order;
         Factors; lambda_12; lambda_13; lambda_14; lambda_23; lambda_24; lambda_34; alpha; beta;
         Lambda1; Lambda2; Lambda3; Lambda4;
         h1_1; h1_2; h2_1; h2_2; h3_1; h3_2; h4_1; h4_2; h5_1; h5_2; h6_1; h6_2;
         MHat; HHat; Hat; hat; init_hat;initRMSE; initPSNR; initerror;RMSE_List; PSNR_List;relative_error_map
         pre; cur; error_history
+        cluster_id
     end
     
     methods
         % create object
-        function obj = BFCTN_model(msi, hsi, Org, P1, P2, P3, rank, hyperparameters)
+        function obj = BFCTN_model(msi, hsi, Org, P1, P2, P3, rank, hyperparameters, cluster_id)
             obj.msi = msi;
             obj.hsi = hsi;
             obj.Org = Org;
@@ -31,6 +32,7 @@ classdef BFCTN_model
             obj.alpha_d_0 = hyperparameters.alpha_d_0;
             obj.beta_e_0 = hyperparameters.beta_e_0;
             obj.beta_f_0 = hyperparameters.beta_f_0;
+            obj.cluster_id = cluster_id;
         end
 
         % initialize parameter
@@ -104,8 +106,8 @@ classdef BFCTN_model
             self.initRMSE = sqrt( sum((self.Org(:)-self.init_hat(:)).^2)./length(self.Org(:)) );
             self.initPSNR = lyPSNR(self.Org, self.init_hat);
             self.initerror = calculateRelativeError3D(self.Org, self.init_hat);
-            fprintf('                   init:   rmse:%g  psnr:%g \n',  self.initRMSE,self.initPSNR);
-                      
+            fprintf('[Group %d Init] rmse:%.4f  psnr:%.2f\n', self.cluster_id, self.initRMSE,self.initPSNR);
+
             for iter=1:RUN_MAX_iterations
                 % update Facotrs{1} - T_1
                 self.Factors{1} = self.upgrade_T1();
@@ -118,7 +120,7 @@ classdef BFCTN_model
 
                 % update Facotrs{4} - T_4
                 self.Factors{4} = self.upgrade_T4();
-                
+
                 % update lambda
                 self.lambda_12 = self.upgrade_lambda_a_12() ./ self.upgrade_lambda_b_12();
                 self.lambda_13 = self.upgrade_lambda_a_13() ./ self.upgrade_lambda_b_13();
@@ -135,15 +137,14 @@ classdef BFCTN_model
                 % update beta
                 self.beta = self.upgrade_beta_e() / self.upgrade_beta_f();
 
-                
                 %% update Z^hat
                 self.hat = double(tnprod_new(self.Factors));
                 self.RMSE_List(iter,1) = sqrt( sum((self.Org(:)-self.hat(:)).^2)./length(self.Org(:)) );
                 self.PSNR_List(iter,1) = lyPSNR(self.Org, self.hat);
-               
 
+                % 输出当前迭代结果
+                fprintf('[Group %d Iter %d/%d] rmse:%.4f  psnr:%.2f\n', self.cluster_id, iter, RUN_MAX_iterations, self.RMSE_List(iter,1), self.PSNR_List(iter,1));
             end
-            fprintf('                    rmse:%g  psnr:%g\n ',  self.RMSE_List(iter),self.PSNR_List(iter));
         end
 
         
