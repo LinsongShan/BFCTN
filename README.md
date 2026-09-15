@@ -1,8 +1,8 @@
 # 🌈 Bayesian Fully Connected Tensor Network for Hyperspectral and Multispectral Image Fusion
 
 **Authors:** Linsong Shan, Zecan Yang, Laurence T. Yang, Changlong Li, Honglu Zhao, Xin Nie  
-📄 **Paper:** [Bayesian Fully Connected Tensor Network for Hyperspectral and Multispectral Image Fusion](https://arxiv.org/abs/2510.18400)  
-[![arXiv](https://img.shields.io/badge/arXiv-2510.18400-b31b1b.svg)](https://arxiv.org/abs/2510.18400)
+📄 **Paper:** [Bayesian Fully Connected Tensor Network for Hyperspectral and Multispectral Image Fusion](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11540397)  
+
 
 ---
 
